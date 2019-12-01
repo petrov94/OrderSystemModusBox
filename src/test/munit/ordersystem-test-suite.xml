@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<munit:config name="ordersystem-test-suite.xml" />
+	<munit:test name="ordersystem-test-suite-ordersystem-search-by-customer-and-date" doc:id="c5a3cf44-8ba2-4a57-a853-7c9174e54a30" description="Test">
+		<munit:behavior >
+			<ee:transform doc:name="Transform Message" doc:id="b7b5e550-b6b4-4e23-8969-55eaac808fde">
+				<ee:message>
+					<ee:set-attributes ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	queryParams: {
+		customer : "John Smith",
+		date : "2019-12-27" 
+	}
+}]]></ee:set-attributes>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="finalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "orders": [
+    {
+      "id": "2d127f1a-ae9a-4b9e-83eb-e156c685d082",
+      "placementDate": "Dec 27, 2019",
+      "customerName": "John Smith",
+      "products": [
+        {
+          "name": "ASUS ROG STIX GL503 ",
+          "price": 2500.0,
+          "count": 2
+        },
+        {
+          "name": "APPLE MacBook Air 13.3",
+          "price": 3000.0,
+          "count": 3
+        }
+      ]
+    }
+  ]
+}]]></ee:set-variable>
+					<ee:set-variable variableName="mockAwsResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+[
+	{
+		"id": "2d127f1a-ae9a-4b9e-83eb-e156c685d082",
+		"placementDate": "Dec 27, 2019",
+		"customerName": "John Smith",
+		"products": [
+	        {
+			"name": "ASUS ROG STIX GL503 ",
+			"price": 2500.0,
+			"count": 2
+		},
+	        {
+			"name": "APPLE MacBook Air 13.3",
+			"price": 3000.0,
+			"count": 3
+		}
+	   ]
+	}
+]
+]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="3094327e-bfc4-4dee-bbe0-3cd1dbf128e7" processor="http:request">
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[vars.mockAwsResponse]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\orders:ordersystem-config" doc:id="90b2091d-1408-4286-88c8-110127f51f82" name="get:\orders:ordersystem-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="7b36c880-1407-4248-923a-7aca82a8aa7d" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ordersystem-test-suite-ordersystem-search-by-customer" doc:id="ba53f40f-4f8e-49f4-8154-94033863b289" description="Test" >
+			<munit:behavior >
+				<ee:transform doc:name="Transform Message" doc:id="0aacaee4-2b3a-49f6-a02d-e22640b5b6fd" >
+					<ee:message >
+						<ee:set-attributes ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	queryParams: {
+		customer : "John Smith"
+	}
+}]]></ee:set-attributes>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="finalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "orders": [
+    {
+        "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+        "placementDate": "Dec 25, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 3
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 1
+            }
+        ]
+    },
+    {
+        "id": "d1aeff65-6fc9-44f0-8241-95e91e380bfc",
+        "placementDate": "Dec 20, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 2
+            },
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 2
+            }
+        ]
+    }
+]
+}]]></ee:set-variable>
+						<ee:set-variable variableName="mockAwsResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+[
+    {
+        "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+        "placementDate": "Dec 25, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 3
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 1
+            }
+        ]
+    },
+    {
+        "id": "d1aeff65-6fc9-44f0-8241-95e91e380bfc",
+        "placementDate": "Dec 20, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 2
+            },
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 2
+            }
+        ]
+    }
+]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="3731bf1a-2eac-464c-aa47-f19b2eda2a5e" processor="http:request" >
+					<munit-tools:then-return >
+						<munit-tools:payload value="#[vars.mockAwsResponse]" mediaType="application/json" />
+					</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution >
+				<flow-ref doc:name="Flow-ref to get:\orders:ordersystem-config" doc:id="c1e3dafd-3be0-404e-a775-0d83ca087208" name="get:\orders:ordersystem-config" />
+			</munit:execution>
+			<munit:validation >
+				<munit-tools:assert-that doc:name="Assert that" doc:id="6b9b00a9-fc95-460e-a3ee-abc46ac8c3ba" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]" />
+			</munit:validation>
+		</munit:test>
+		<munit:test name="ordersystem-test-suite-ordersystem-search-by-date" doc:id="26752420-3351-44ee-a4e1-29b1054ad579" description="Test" >
+			<munit:behavior >
+				<ee:transform doc:name="Transform Message" doc:id="9ef05236-8e76-4910-9988-ee5d2e6edbe2" >
+					<ee:message >
+						<ee:set-attributes ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	queryParams: {
+		date : "2019-12-27"
+	}
+}]]></ee:set-attributes>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="finalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "orders": [
+    {
+        "id": "2d127f1a-ae9a-4b9e-83eb-e156c685d082",
+        "placementDate": "Dec 27, 2019",
+        "customerName": "Ivan Ivanov",
+        "products": [
+            {
+                "name": "ASUS ROG STIX GL503 ",
+                "price": 2500.0,
+                "count": 2
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 3
+            }
+        ]
+    }
+]
+}]]></ee:set-variable>
+						<ee:set-variable variableName="mockAwsResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+[
+    {
+        "id": "2d127f1a-ae9a-4b9e-83eb-e156c685d082",
+        "placementDate": "Dec 27, 2019",
+        "customerName": "Ivan Ivanov",
+        "products": [
+            {
+                "name": "ASUS ROG STIX GL503 ",
+                "price": 2500.0,
+                "count": 2
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 3
+            }
+        ]
+    }
+]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="2567e251-8806-4492-ac0f-59c7d99b79ef" processor="http:request" >
+					<munit-tools:then-return >
+						<munit-tools:payload value="#[vars.mockAwsResponse]" mediaType="application/json" />
+					</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution >
+				<flow-ref doc:name="Flow-ref to get:\orders:ordersystem-config" doc:id="91742e4c-ef7d-4df8-b95b-a8f190c1a001" name="get:\orders:ordersystem-config" />
+			</munit:execution>
+			<munit:validation >
+				<munit-tools:assert-that doc:name="Assert that" doc:id="48708ad7-bf26-4cf9-ba60-3f45125346b6" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]" />
+			</munit:validation>
+		</munit:test>
+		<munit:test name="ordersystem-test-suite-ordersystem-get-all" doc:id="337682a1-fd5e-450e-bca8-4b06c431744b" description="Test" >
+			<munit:behavior >
+				<ee:transform doc:name="Transform Message" doc:id="17af1bd3-7b1e-4da8-9fa9-c6a8141e8198" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="finalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "orders": [
+    {
+        "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+        "placementDate": "Dec 25, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 3
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 1
+            }
+        ]
+    },
+    {
+        "id": "2d127f1a-ae9a-4b9e-83eb-e156c685d082",
+        "placementDate": "Dec 27, 2019",
+        "customerName": "Ivan Ivanov",
+        "products": [
+            {
+                "name": "ASUS ROG STIX GL503 ",
+                "price": 2500.0,
+                "count": 2
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 3
+            }
+        ]
+    },
+    {
+        "id": "0d82d131-61bc-461a-bbee-aef350f20522",
+        "placementDate": "Dec 28, 2019",
+        "customerName": "Albert Schweitzer",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 5
+            },
+            {
+                "name": "ASUS ROG STIX GL503 ",
+                "price": 2500.0,
+                "count": 2
+            }
+        ]
+    },
+    {
+        "id": "d1aeff65-6fc9-44f0-8241-95e91e380bfc",
+        "placementDate": "Dec 20, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 2
+            },
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 2
+            }
+        ]
+    },
+    {
+        "id": "0e733c81-1741-4f72-9402-f77c5f2f486c",
+        "placementDate": "Dec 20, 2019",
+        "customerName": "Albert Schweitzer",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 10
+            }
+        ]
+    }
+]
+}]]></ee:set-variable>
+						<ee:set-variable variableName="mockAwsResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+[
+    {
+        "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+        "placementDate": "Dec 25, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 3
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 1
+            }
+        ]
+    },
+    {
+        "id": "2d127f1a-ae9a-4b9e-83eb-e156c685d082",
+        "placementDate": "Dec 27, 2019",
+        "customerName": "Ivan Ivanov",
+        "products": [
+            {
+                "name": "ASUS ROG STIX GL503 ",
+                "price": 2500.0,
+                "count": 2
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 3
+            }
+        ]
+    },
+    {
+        "id": "0d82d131-61bc-461a-bbee-aef350f20522",
+        "placementDate": "Dec 28, 2019",
+        "customerName": "Albert Schweitzer",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 5
+            },
+            {
+                "name": "ASUS ROG STIX GL503 ",
+                "price": 2500.0,
+                "count": 2
+            }
+        ]
+    },
+    {
+        "id": "d1aeff65-6fc9-44f0-8241-95e91e380bfc",
+        "placementDate": "Dec 20, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 2
+            },
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 2
+            }
+        ]
+    },
+    {
+        "id": "0e733c81-1741-4f72-9402-f77c5f2f486c",
+        "placementDate": "Dec 20, 2019",
+        "customerName": "Albert Schweitzer",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 10
+            }
+        ]
+    }
+]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="8a777789-08b4-4f11-bd89-f4ba43a716a8" processor="http:request" >
+					<munit-tools:then-return >
+						<munit-tools:payload value="#[vars.mockAwsResponse]" mediaType="application/json" />
+					</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution >
+				<flow-ref doc:name="Flow-ref to get:\orders:ordersystem-config" doc:id="fa4ba840-57e3-4b1e-b6bc-477ae8b94e65" name="get:\orders:ordersystem-config" />
+			</munit:execution>
+			<munit:validation >
+				<munit-tools:assert-that doc:name="Assert that" doc:id="5b279df8-ed9a-4a50-818a-4b451e7629ef" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]" />
+			</munit:validation>
+		</munit:test>
+		<munit:test name="ordersystem-test-suite-ordersystem-get-by-id" doc:id="ef5e7035-c2d9-4603-982c-8d792b818e3d" description="Test" >
+			<munit:behavior >
+				<ee:transform doc:name="Transform Message" doc:id="eb148d4c-3d15-42dc-90ec-b7c181b90a38" >
+					<ee:message >
+						<ee:set-attributes ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	uriParams: {
+		id : "2d127f1a-ae9a-4b9e-83eb-e156c685d082"
+	}
+}]]></ee:set-attributes>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="finalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "orders": [
+    {
+        "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+        "placementDate": "Dec 25, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 3
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 1
+            }
+        ]
+    }
+]
+}]]></ee:set-variable>
+						<ee:set-variable variableName="mockAwsResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+[
+    {
+        "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+        "placementDate": "Dec 25, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 3
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 1
+            }
+        ]
+    }
+]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="de7417c5-965f-4c49-adb4-0d3441e453f7" processor="http:request" >
+					<munit-tools:then-return >
+						<munit-tools:payload value="#[vars.mockAwsResponse]" mediaType="application/json" />
+					</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution >
+				<flow-ref doc:name="Flow-ref to get:\orders\(orderid):ordersystem-config" doc:id="d1559a84-7d8c-4429-9abc-98fc64cfc761" name="get:\orders\(orderid):ordersystem-config" />
+			</munit:execution>
+			<munit:validation >
+				<munit-tools:assert-that doc:name="Assert that" doc:id="94dd76fd-874f-4af2-b411-e029f4ff144f" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]" />
+			</munit:validation>
+		</munit:test>
+		<munit:test name="ordersystem-test-suite-ordersystem-cost" doc:id="7ed263ab-f067-4b39-b49d-3bf75a4ac52b" description="Test" >
+			<munit:behavior >
+				<ee:transform doc:name="Transform Message" doc:id="b919d293-6ad1-4ad1-b735-dd7a233a8383" >
+					<ee:message >
+						<ee:set-attributes ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	uriParams: {
+		id : "2d127f1a-ae9a-4b9e-83eb-e156c685d082"
+	}
+}]]></ee:set-attributes>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="finalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "order": {
+    "cost": 7500.0,
+    "placementDate": "Dec 25, 2019"
+  }
+}]]></ee:set-variable>
+						<ee:set-variable variableName="mockAwsResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+[
+    {
+        "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+        "placementDate": "Dec 25, 2019",
+        "customerName": "John Smith",
+        "products": [
+            {
+                "name": "MSI GL63 8RC",
+                "price": 1500.0,
+                "count": 3
+            },
+            {
+                "name": "APPLE MacBook Air 13.3",
+                "price": 3000.0,
+                "count": 1
+            }
+        ]
+    }
+]
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="a69118d8-4196-4ce1-8683-04562a13e30a" processor="http:request" >
+					<munit-tools:then-return >
+						<munit-tools:payload value="#[vars.mockAwsResponse]" mediaType="application/json" />
+					</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution >
+				<flow-ref doc:name="Flow-ref to get:\orders\(orderid)\cost:ordersystem-config" doc:id="62e3f296-6e36-4545-ad41-a2c3a5e710af" name="get:\orders\(orderid)\cost:ordersystem-config" />
+			</munit:execution>
+			<munit:validation >
+				<munit-tools:assert-that doc:name="Assert that" doc:id="678b4168-af41-4826-8cf2-cd4745ec207b" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]" />
+			</munit:validation>
+		</munit:test>
+</mule>

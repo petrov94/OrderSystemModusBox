@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<error-handler name="global-error-handler" doc:id="684ce452-63ae-455c-b807-0032a98f5402">
+		
+		<on-error-continue type="HTTP:BAD_REQUEST,HTTP:PARSING,APIKIT:BAD_REQUEST"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d4b0e321-46f8-4eef-bfd3-cdef21d16c06">
+			<set-variable value="#[400]" doc:name="Set the HTTP Status - 400" doc:id="5c9f0b9e-1bb0-4474-a76a-196979a974c3" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="194021e9-feef-4fb2-8420-ab20d7fdbf62" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue type="HTTP:CLIENT_SECURITY,HTTP:SECURITY,SECURITY"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="26960edb-d15b-4678-ab4f-de94c6604193">
+			<set-variable value="#[401]" doc:name="Set the HTTP Status - 401" doc:id="440ff5d7-7119-467c-8bf6-59e6f9d57951" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="1975ccf5-70c4-434c-b37c-a08450c566d9" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue type="HTTP:FORBIDDEN,HTTP:UNAUTHORIZED"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6e92bac3-704f-410d-bc71-f4316fba13c8">
+			<set-variable value="#[403]" doc:name="Set the HTTP Status - 403" doc:id="a38d5147-7130-4290-852d-0d1e042efb9c" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="1e6cbaf5-2a5d-41c1-80aa-de8638572c18" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue type="APIKIT:NOT_FOUND,HTTP:NOT_FOUND"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6ee9d044-f1de-4b7c-888d-4201d7c25580">
+			<set-variable value="#[404]" doc:name="Set the HTTP Status - 404" doc:id="56f40990-e09e-4770-b8be-e12ccf5c690f" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="2174f4ec-5cff-434e-9770-d69b20af785e" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue type="APIKIT:METHOD_NOT_ALLOWED,HTTP:METHOD_NOT_ALLOWED"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="059cb187-8c80-49e3-ad58-d5e1895b4484">
+			<set-variable value="#[405]" doc:name="Set the HTTP Status - 405" doc:id="cfb51296-ec73-4c71-9cb3-5d095133a8d1" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="3e1f547b-3c12-476d-8f39-cfe68b943759" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue type="APIKIT:UNSUPPORTED_MEDIA_TYPE,HTTP:UNSUPPORTED_MEDIA_TYPE"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="33256865-917e-479c-b9bc-d34c2b5a0c3b">
+			<set-variable value="#[415]" doc:name="Set the HTTP Status - 415" doc:id="e3099538-4f98-4674-9854-8cf5c3f31e80" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="702f909a-ff5d-40fb-8101-706f2f7f17be" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue type="HTTP:CONNECTIVITY,CONNECTIVITY"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="04a32017-f6b9-4bf3-a24a-25450e982167">
+			<set-variable value="#[503]" doc:name="Set the HTTP Status - 503" doc:id="cbd1372f-f723-4647-a0db-ea7d496d4564" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="958b4f68-7e9a-4700-b9f6-8e70675e3e28" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue type="HTTP:TIMEOUT,TIMEOUT"
+			enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="cc2f30f0-6569-4351-aa35-71749d83f4fc">
+			<set-variable value="#[504]" doc:name="Set the HTTP Status - 504" doc:id="f8f036ef-2b0e-4fee-aca1-e84915bad9b1" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="eb2d4358-d33c-43da-89a0-1e39e0fdb030" name="common-error-response-sub-flow" />
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d20fd2db-1b10-4d9d-816b-327352e5486b" type="ANY">
+			<set-variable value="#[500]" doc:name="Set HTTP Status - 500" variableName="httpStatus" />
+			<flow-ref doc:name="common-error-response-sub-flow" doc:id="2de88271-6629-4074-830d-ec2babe4dd8b" name="common-error-response-sub-flow" />
+		</on-error-continue>
+	</error-handler>
+	</mule>

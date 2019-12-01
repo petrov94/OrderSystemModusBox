@@ -1,0 +1,107 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/be3cc4f0-d06f-446b-99de-694640697ac5/ # 
+title: OrderSystem
+
+version: 1.0
+mediaType: application/json
+protocols:
+  - HTTP 
+  - HTTPS
+
+traits: 
+  client-id-policy: !include client-id-policy/client-id-policy.raml
+
+/orders:
+  get:
+    is: [client-id-policy]
+    queryParameters:
+      customer?:
+        type: string
+        example: John Smith
+      date?:
+          type: date-only
+          example: 2019-12-25
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              [
+                {
+                    "id": "0d769547-b61b-4c13-98b8-59f4fee3401d",
+                    "placementDate": "Dec 25, 2019",
+                    "customerName": "John Smith",
+                    "products": [
+                        {
+                            "name": "MSI GL63 8RC",
+                            "price": 1500.0,
+                            "count": 3
+                        },
+                        {
+                            "name": "APPLE MacBook Air 13.3",
+                            "price": 3000.0,
+                            "count": 1
+                        }
+                    ]
+                },
+                {
+                    "id": "d1aeff65-6fc9-44f0-8241-95e91e380bfc",
+                    "placementDate": "Dec 20, 2019",
+                    "customerName": "John Smith",
+                    "products": [
+                        {
+                            "name": "APPLE MacBook Air 13.3",
+                            "price": 3000.0,
+                            "count": 2
+                        },
+                        {
+                            "name": "MSI GL63 8RC",
+                            "price": 1500.0,
+                            "count": 2
+                        }
+                    ]
+                }
+            ]
+  /{orderid}:
+      is: [client-id-policy]
+      uriParameters:
+        orderid:
+          type: string
+          pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+          example: 2d127f1a-ae9a-4b9e-83eb-e156c685d082
+      get:
+        responses:
+            200:
+              body:
+                application/json:
+                  example:
+                    {
+                        "id": "2d127f1a-ae9a-4b9e-83eb-e156c685d082",
+                        "placementDate": "Dec 27, 2019",
+                        "customerName": "Ivan Ivanov",
+                        "products": [
+                            {
+                                "name": "ASUS ROG STIX GL503 ",
+                                "price": 2500.0,
+                                "count": 2
+                            },
+                            {
+                                "name": "APPLE MacBook Air 13.3",
+                                "price": 3000.0,
+                                "count": 3
+                            }
+                        ]
+                    }
+      /cost:
+        get:
+          is: [client-id-policy]
+          responses:
+            200:
+              body:
+                application/json:
+                  example:
+                    {
+                      "cost": 2500,
+                      "placementDate": "Dec 27, 2019"
+                    }
+

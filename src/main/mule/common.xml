@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<sub-flow name="common-response-sub-flow" doc:id="5a5ada81-1580-4bd0-9e94-aff02013ec5f" >
+		<ee:transform doc:name="Generate Response" doc:id="68a4b857-cccc-4021-a0e3-ecbdeec696f0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+if(!isEmpty(payload)){
+	orders: payload
+}else{
+	order : "No such order was found."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="common-error-response-sub-flow" doc:id="c404c289-cf88-414c-998e-e89718c1a5b4">
+		<set-variable value="#['ERROR']" doc:name="logLevel" doc:id="80dbba4c-52a4-45aa-b43a-e7dbc772449c" variableName="logLevel" mimeType="application/java" />
+		<set-variable value="#[error]" doc:name="error" doc:id="9b6fd696-2ba3-4f40-92e4-1413e4733b64" variableName="error" />
+		<ee:transform doc:name="checkIfErrorIsPropagated" doc:id="4272968f-9a6b-4441-b9fc-aa8998d743c9">
+			<ee:variables>
+				<ee:set-variable variableName="errors"><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+if (vars.errors == null and vars.error.errorMessage.payload != null and vars.error.errorMessage.payload is Object)(
+	if (isEmpty(vars.error.errorMessage.payload.errors))[
+		{
+			errorCode: vars.error.errorMessage.payload.errorCode,
+			shortDescription: vars.error.errorMessage.payload.message,
+			system: "microservices",
+			severity: 'medium',
+			source: vars.error.cause.info.Element
+		}
+	] else vars.error.errorMessage.payload.errors
+) else null]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Compose Error Payload" doc:id="7b192ee4-ae30-4ebb-8c4a-0161a9e0935b">
+			<ee:variables >
+				<ee:set-variable variableName="errors" ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+if (vars.errors == null) [
+	{
+		errorCode: vars.httpStatus,
+		shortDescription: if(vars.error.cause.message != null) vars.error.cause.message else "Generic Error",
+		system: Mule::p('api.name'),
+		severity: 'medium',
+		source: vars.inboundAttributes['X-Channel']
+	}
+] else vars.errors]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Generate Response" doc:id="3322a191-037f-4614-9357-eed0ce6bb97d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+'errors': vars.errors]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	</mule>

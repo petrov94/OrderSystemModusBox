@@ -1,0 +1,25 @@
+api:
+  name: "order-system"
+  version: "v1"
+  id: "15688162"
+ 
+http:
+  host: "0.0.0.0"
+  port: "8015"
+  private:
+    port: "8015"
+  timeout: "5000"
+  path: "/api/${api.version}/*"
+
+aws-lambdas:
+  protocol: "HTTPS"
+  port: "443"
+  host: "nqafucyqgl.execute-api.eu-central-1.amazonaws.com"
+  find_by_id: "/dev/orderbyid"
+  find_by_customer: "/dev/orderbycustomer"
+  find_by_date: "/dev/orderbydate"
+  find_by_date_and_customer: "/dev/orderbydateandcustomer"
+  find_all: "/dev/ordersall"
+  region: "EU_CENTRAL_1"
+  timeout: "10000"
+

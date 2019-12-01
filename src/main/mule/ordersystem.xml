@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="ordersystem-main">
+        <http:listener config-ref="HTTP_Listener_config" path="${http.path}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="ordersystem-config" />
+    </flow>
+    <flow name="ordersystem-console">
+        <http:listener config-ref="HTTP_Listener_config" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="ordersystem-config" />
+    </flow>
+    <flow name="get:\orders:ordersystem-config">
+		<logger level="INFO" doc:name="Logger" doc:id="40907ea9-6843-4f66-9541-7f083e14555b" message='"Ïnbound event"  #[message]'/>
+		<choice doc:name="Choice" doc:id="e2838d7f-1fb7-425e-84d4-5e8825df3697" >
+			<when expression="#[!isEmpty(attributes.queryParams.customer) and !isEmpty(attributes.queryParams.date)]">
+				<http:request method="GET" doc:name="Find all orders by customer name on a specific date" doc:id="34cba708-1dd9-40d5-ba39-8d73edcdda57" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_by_date_and_customer}" >
+					<http:body ><![CDATA[#[null]]]></http:body>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"date" : attributes.queryParams.date,
+	"customer" : attributes.queryParams.customer
+}]]]></http:query-params>
+				</http:request>
+			</when>
+			<when expression="#[!isEmpty(attributes.queryParams.customer)]">
+				<http:request method="GET" doc:name="Find all orders by customer name" doc:id="22254465-6c00-4ea8-82fc-d5fb71da85a1" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_by_customer}" >
+					<http:body ><![CDATA[#[null]]]></http:body>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"customer" : attributes.queryParams.customer
+}]]]></http:query-params>
+				</http:request>
+			</when>
+			<when expression="#[!isEmpty(attributes.queryParams.date)]">
+				<http:request method="GET" doc:name="Find all orders on given date" doc:id="034f929e-08ae-4361-9f2a-80b445b9a562" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_by_date}" >
+					<http:body ><![CDATA[#[null]]]></http:body>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"date" : attributes.queryParams.date
+}]]]></http:query-params>
+				</http:request>
+			</when>
+			<otherwise >
+				<http:request method="GET" doc:name="Find all orders" doc:id="b44f3281-18a3-4af3-bddf-6a653690726e" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_all}" >
+					<http:body ><![CDATA[#[null]]]></http:body>
+					<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"date" : attributes.queryParams.date
+}]]]></http:query-params>
+				</http:request>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="66cee9b7-98a5-4ece-b6e7-9b43ebb5a50d" message='"Remote side response"  #[payload]' />
+		<flow-ref doc:name="Flow Reference to common-response-sub-flow" doc:id="10850bf6-3e41-4ad6-b4a7-1ae396c11097" name="common-response-sub-flow" />
+		<logger level="INFO" doc:name="Logger" doc:id="7f14b2ed-78cc-4997-8b0c-6e1324705bb3" message='"Final response"  #[payload]' />
+    </flow>
+    <flow name="get:\orders\(orderid):ordersystem-config">
+		<logger level="INFO" doc:name="Logger" doc:id="037a7eef-f2ef-470c-848f-068be6d7c716" message='"Inbound event"  #[message]' />
+		<http:request method="GET" doc:name="Find order by id" doc:id="c3679fd3-b63d-460f-8278-d71d158d1327" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_by_id}">
+			<http:body ><![CDATA[#[null]]]></http:body>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"id" : attributes.uriParams.orderid
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="e969bc4d-664c-4dd2-8a58-00f7a23191ca" message='"Remote side response"  #[payload]' />
+		<flow-ref doc:name="Flow Reference to common-response-sub-flow" doc:id="a0f108c5-c561-4ae1-aba9-05280349b463" name="common-response-sub-flow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ef1e4681-8517-4bda-b421-f414f0f1730c" message='"Final response"  #[payload]' />
+    </flow>
+	<flow name="get:\orders\(orderid)\cost:ordersystem-config" doc:id="a627efb7-427e-4c7f-b9d2-e3976598dace" >
+		<logger level="INFO" doc:name="Logger" doc:id="14e9d94d-6616-4502-9a70-773af9733170" message='"Inbound event"  #[message]' />
+		<http:request method="GET" doc:name="Find order by id" doc:id="d1bacafc-9b88-4922-a39a-5a2c207ca960" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_by_id}">
+			<http:body ><![CDATA[#[null]]]></http:body>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"id" : attributes.uriParams.orderid
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="e7446c8f-a404-4818-8f09-fa5dec4c3561" message='"Remote side response"  #[payload]' />
+		<ee:transform doc:name="Transform Message" doc:id="a740a559-5a46-489f-844a-c4b16e7f0eab" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var result = {
+	"cost" : payload.products[0] reduce ((val, acc = 0)-> acc + ((val.price as Number) * (val.count as Number))),
+	"placementDate" : payload.placementDate[0]
+}
+---
+if(!isEmpty(payload)){
+	order : result
+}else{
+	order :"No such order was found."
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="43d61162-efbe-45cb-b338-9c9d2da9ceb8" message='"Final response"  #[payload]'/>
+	</flow>
+</mule>
