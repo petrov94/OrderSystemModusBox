@@ -47,7 +47,8 @@ public class DbManager {
             statement.setDate(1, new java.sql.Date(dateFormat.parse(placementDate).getTime()));
             resultSet = statement.executeQuery();
         } catch (IOException | ClassNotFoundException | SQLException | ParseException ex) {
-        	logger.log("Error: " + ex.getMessage());
+        	logger.log(ex.getMessage());
+        	throw new RuntimeException(ex.getMessage());
         }
         return consumeQueryResult(resultSet);
     }
@@ -59,7 +60,8 @@ public class DbManager {
             statement.setString(1, customer);
             resultSet = statement.executeQuery();
         } catch (IOException | ClassNotFoundException | SQLException ex) {
-        	logger.log("Error: " + ex.getMessage());
+        	logger.log(ex.getMessage());
+        	throw new RuntimeException(ex.getMessage());
         }
         return consumeQueryResult(resultSet);
     }
@@ -70,8 +72,10 @@ public class DbManager {
             PreparedStatement statement = createConnection().prepareStatement(QueryConfiguration.queryFindById);
             statement.setString(1, id);
             resultSet = statement.executeQuery();
+            if(resultSet == null) throw new RuntimeException("There are no records.");
         } catch (IOException | ClassNotFoundException | SQLException ex) {
-        	logger.log("Error: " + ex.getMessage());
+        	logger.log(ex.getMessage());
+        	throw new RuntimeException(ex.getMessage());
         }
         return consumeQueryResult(resultSet);
     }
@@ -84,7 +88,8 @@ public class DbManager {
             statement.setString(2, customer);
             resultSet = statement.executeQuery();
         } catch (IOException | ClassNotFoundException | SQLException | ParseException ex) {
-        	logger.log("Error: " + ex.getMessage());
+        	logger.log(ex.getMessage());
+        	throw new RuntimeException(ex.getMessage());
         }
         return consumeQueryResult(resultSet);
     }
@@ -95,7 +100,8 @@ public class DbManager {
             Statement statement = createConnection().createStatement();
             resultSet = statement.executeQuery(QueryConfiguration.queryFindAllOrders);
         } catch (IOException | ClassNotFoundException | SQLException ex) {
-            ex.printStackTrace();
+        	logger.log(ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
         return consumeQueryResult(resultSet);
     }
@@ -120,7 +126,8 @@ public class DbManager {
                 }
             }
         } catch (SQLException ex) {
-        	logger.log("Error: " + ex.getMessage());
+        	logger.log(ex.getMessage());
+        	throw new RuntimeException(ex.getMessage());
         }
         return allOrders;
     }
