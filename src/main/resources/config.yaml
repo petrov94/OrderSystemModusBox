@@ -1,13 +1,11 @@
 api:
   name: "order-system"
   version: "v1"
-  id: "15688162"
+  id: "15895982"
  
 http:
   host: "0.0.0.0"
   port: "8015"
-  private:
-    port: "8015"
   timeout: "5000"
   path: "/api/${api.version}/*"
 

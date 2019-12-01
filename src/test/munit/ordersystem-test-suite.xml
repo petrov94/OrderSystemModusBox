@@ -536,7 +536,7 @@ output application/json
 				</munit-tools:mock-when>
 			</munit:behavior>
 			<munit:execution >
-				<flow-ref doc:name="Flow-ref to get:\orders\(orderid):ordersystem-config" doc:id="d1559a84-7d8c-4429-9abc-98fc64cfc761" name="get:\orders\(orderid):ordersystem-config" />
+				<flow-ref doc:name="Flow-ref to get:\order\(orderid):ordersystem-config" doc:id="d1559a84-7d8c-4429-9abc-98fc64cfc761" name="get:\order\(orderid):ordersystem-config" />
 			</munit:execution>
 			<munit:validation >
 				<munit-tools:assert-that doc:name="Assert that" doc:id="94dd76fd-874f-4af2-b411-e029f4ff144f" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]" />
@@ -597,7 +597,7 @@ output application/json
 				</munit-tools:mock-when>
 			</munit:behavior>
 			<munit:execution >
-				<flow-ref doc:name="Flow-ref to get:\orders\(orderid)\cost:ordersystem-config" doc:id="62e3f296-6e36-4545-ad41-a2c3a5e710af" name="get:\orders\(orderid)\cost:ordersystem-config" />
+				<flow-ref doc:name="Flow-ref to get:\order\(orderid)\cost:ordersystem-config" doc:id="62e3f296-6e36-4545-ad41-a2c3a5e710af" name="get:\order\(orderid)\cost:ordersystem-config" />
 			</munit:execution>
 			<munit:validation >
 				<munit-tools:assert-that doc:name="Assert that" doc:id="678b4168-af41-4826-8cf2-cd4745ec207b" is="#[MunitTools::equalTo(vars.finalPayload)]" expression="#[payload]" />

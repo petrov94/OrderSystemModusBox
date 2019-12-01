@@ -74,7 +74,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<flow-ref doc:name="Flow Reference to common-response-sub-flow" doc:id="10850bf6-3e41-4ad6-b4a7-1ae396c11097" name="common-response-sub-flow" />
 		<logger level="INFO" doc:name="Logger" doc:id="7f14b2ed-78cc-4997-8b0c-6e1324705bb3" message='"Final response"  #[payload]' />
     </flow>
-    <flow name="get:\orders\(orderid):ordersystem-config">
+    <flow name="get:\order\(orderid):ordersystem-config">
 		<logger level="INFO" doc:name="Logger" doc:id="037a7eef-f2ef-470c-848f-068be6d7c716" message='"Inbound event"  #[message]' />
 		<http:request method="GET" doc:name="Find order by id" doc:id="c3679fd3-b63d-460f-8278-d71d158d1327" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_by_id}">
 			<http:body ><![CDATA[#[null]]]></http:body>
@@ -88,7 +88,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<flow-ref doc:name="Flow Reference to common-response-sub-flow" doc:id="a0f108c5-c561-4ae1-aba9-05280349b463" name="common-response-sub-flow"/>
 		<logger level="INFO" doc:name="Logger" doc:id="ef1e4681-8517-4bda-b421-f414f0f1730c" message='"Final response"  #[payload]' />
     </flow>
-	<flow name="get:\orders\(orderid)\cost:ordersystem-config" doc:id="a627efb7-427e-4c7f-b9d2-e3976598dace" >
+	<flow name="get:\order\(orderid)\cost:ordersystem-config" doc:id="a627efb7-427e-4c7f-b9d2-e3976598dace" >
 		<logger level="INFO" doc:name="Logger" doc:id="14e9d94d-6616-4502-9a70-773af9733170" message='"Inbound event"  #[message]' />
 		<http:request method="GET" doc:name="Find order by id" doc:id="d1bacafc-9b88-4922-a39a-5a2c207ca960" config-ref="HTTP_Request_configuration" path="${aws-lambdas.find_by_id}">
 			<http:body ><![CDATA[#[null]]]></http:body>
